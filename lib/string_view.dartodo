@@ -1,0 +1,180 @@
+extension on String {
+  StringView sv() => StringView.fromString(this);
+}
+
+class _EagerStringView implements StringView {
+  final String _base;
+}
+
+class _LazyStringView implements StringView {
+  final String _base;
+  String? __substring;
+  final int _start;
+  final int _end;
+  String get _substring => __substring ??= _base.substring(_start, _end);
+
+  _LazyStringView._(this._base, this._start, this._end);
+}
+
+class a implements Comparable<a>, Pattern {
+  @override
+  Iterable<Match> allMatches(String string, [int start = 0]) {
+    // TODO: implement allMatches
+    throw UnimplementedError();
+  }
+
+  @override
+  Match? matchAsPrefix(String string, [int start = 0]) {
+    // TODO: implement matchAsPrefix
+    throw UnimplementedError();
+  }
+}
+
+abstract class _StringTraits {
+  String operator [](int index);
+  int codeUnitAt(int index);
+  int get length;
+  bool endsWith(String other);
+  bool startsWith(Pattern pattern, [int index = 0]);
+  int indexOf(Pattern pattern, [int start = 0]);
+  int lastIndexOf(Pattern pattern, [int? start]);
+  bool get isEmpty;
+  bool get isNotEmpty;
+  String operator +(String other);
+  String substring(int start, [int? end]);
+  String trim();
+  String trimLeft();
+  String trimRight();
+  String operator *(int times);
+  String padLeft(int width, [String padding = ' ']);
+  String padRight(int width, [String padding = ' ']);
+  bool contains(Pattern other, [int startIndex = 0]);
+  String replaceFirst(Pattern from, String to, [int startIndex = 0]);
+  String replaceFirstMapped(Pattern from, String replace(Match match),
+      [int startIndex = 0]);
+  String replaceAll(Pattern from, String replace);
+  String replaceAllMapped(Pattern from, String Function(Match match) replace);
+  String replaceRange(int start, int? end, String replacement);
+  List<String> split(Pattern pattern);
+  String splitMapJoin(
+    Pattern pattern, {
+    String Function(Match)? onMatch,
+    String Function(String)? onNonMatch,
+  });
+  List<int> get codeUnits;
+  Runes get runes;
+  String toLowerCase();
+  String toUpperCase();
+
+  int get hashCode;
+  bool operator ==(Object other);
+}
+
+mixin _AsStringTraitsMixin implements _StringTraits {
+  String get _asString;
+
+  int defaultIndexOf(Pattern pattern, [int start = 0]);
+  int defaultLastIndexOf(Pattern pattern, [int? start]);
+  String operator +(String other);
+  String substring(int start, [int? end]);
+  String trim();
+  String trimLeft();
+  String trimRight();
+  String operator *(int times) => _asString * times;
+  String padLeft(int width, [String padding = ' ']) =>
+      _asString.padLeft(width, padding);
+  String padRight(int width, [String padding = ' ']) =>
+      _asString.padRight(width, padding);
+  bool contains(Pattern other, [int startIndex = 0]);
+  String replaceFirst(Pattern from, String to, [int startIndex = 0]) =>
+      _asString.replaceFirst(from, to, startIndex);
+  String replaceFirstMapped(Pattern from, String replace(Match match),
+          [int startIndex = 0]) =>
+      _asString.replaceFirstMapped(from, replace, startIndex);
+  String replaceAll(Pattern from, String replace);
+  String replaceAllMapped(Pattern from, String Function(Match match) replace);
+  String replaceRange(int start, int? end, String replacement);
+  List<String> split(Pattern pattern);
+  String splitMapJoin(
+    Pattern pattern, {
+    String Function(Match)? onMatch,
+    String Function(String)? onNonMatch,
+  }) =>
+      _asString.splitMapJoin(
+        pattern,
+        onMatch: onMatch,
+        onNonMatch: onNonMatch,
+      );
+  Runes get runes;
+  String toLowerCase();
+  String toUpperCase();
+
+  int get hashCode;
+  bool operator ==(Object other);
+
+}
+
+abstract class StringView implements Comparable<StringView>, Pattern {
+  String get _asString;
+
+  String operator [](int index);
+  int codeUnitAt(int index);
+  int get length;
+  bool endsWith(String other);
+  bool startsWith(Pattern pattern, [int index = 0]);
+  int indexOf(Pattern pattern, [int start = 0]);
+  int lastIndexOf(Pattern pattern, [int? start]);
+  bool get isEmpty;
+  bool get isNotEmpty;
+  String operator +(String other);
+  String substring(int start, [int? end]);
+  String trim();
+  String trimLeft();
+  String trimRight();
+  String operator *(int times) => _asString * times;
+  String padLeft(int width, [String padding = ' ']) =>
+      _asString.padLeft(width, padding);
+  String padRight(int width, [String padding = ' ']) =>
+      _asString.padRight(width, padding);
+  bool contains(Pattern other, [int startIndex = 0]);
+  String replaceFirst(Pattern from, String to, [int startIndex = 0]) =>
+      _asString.replaceFirst(from, to, startIndex);
+  String replaceFirstMapped(Pattern from, String replace(Match match),
+          [int startIndex = 0]) =>
+      _asString.replaceFirstMapped(from, replace, startIndex);
+  String replaceAll(Pattern from, String replace);
+  String replaceAllMapped(Pattern from, String Function(Match match) replace);
+  String replaceRange(int start, int? end, String replacement);
+  List<String> split(Pattern pattern);
+  String splitMapJoin(
+    Pattern pattern, {
+    String Function(Match)? onMatch,
+    String Function(String)? onNonMatch,
+  }) =>
+      _asString.splitMapJoin(
+        pattern,
+        onMatch: onMatch,
+        onNonMatch: onNonMatch,
+      );
+  List<int> get codeUnits;
+  Runes get runes;
+  String toLowerCase();
+  String toUpperCase();
+
+  int get hashCode;
+  bool operator ==(Object other);
+
+  /*
+   Comparable<StringView>
+   */
+  @override
+  int compareTo(String other);
+  /*
+   Pattern
+   */
+  @override
+  Iterable<Match> allMatches(String string, [int start = 0]);
+
+  @override
+  Match? matchAsPrefix(String string, [int start = 0]);
+}
