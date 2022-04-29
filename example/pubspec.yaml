@@ -4,10 +4,12 @@ version: 1.0.0
 # homepage: https://www.example.com
 
 environment:
-  sdk: '>=2.17.0-119.0.dev <3.0.0'
+  sdk: '>=2.15.0 <3.0.0'
 
-# dependencies:
-#   path: ^1.8.0
+dependencies:
+  parser_combinator:
+    path: ../
+  collection:
 
 dev_dependencies:
   lints: ^1.0.0

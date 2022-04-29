@@ -9,9 +9,6 @@ import 'package:utils/utils.dart';
 import 'parser_monad.dart';
 import 'type.dart';
 
-Parser<Tuple<A, B>> parseBoth<A, B>(Parser<A> a, Parser<B> b) =>
-    pure(Tuple<A, B>.new.curry) << a << b;
-
 class _EitherParserException implements ParseError {
   final ParseError aFailure;
   final ParseError bFailure;
@@ -32,40 +29,49 @@ class _OrParserException implements ParseError {
       'The first failed with $aFailure and the second failed with $bFailure';
 }
 
-Parser<T> parseOr<T>(Parser<T> left, Parser<T> right) => left.bindResult(
-      (leftResult) => leftResult.visit(
-        a: (leftErr) => right.bindResult(
-          (rightResult) => rightResult.visit(
-            // fail or failure?
-            a: _OrParserException.new.curry(leftErr).comp(failure),
-            b: pure,
-          ),
+final Parser<Tuple<ParseState, int>> readP =
+    (s, l) => ParseResult.right(Tuple(s, l));
+
+Fn1<Parser<A>, Parser<A>> writeP<A>(ParseState state, int line) =>
+    (p) => (_, __) => p(state, line);
+
+Fn1<Parser<A>, Parser<A>> modifyP<A>(
+  Tuple<ParseState, int> Function(Tuple<ParseState, int>) mutate,
+) =>
+    (p) => (s, l) {
+          final newState = mutate(Tuple(s, l));
+          return p(newState.left, newState.right);
+        };
+
+Parser<Tuple<A, B>> parseBoth<A, B>(Parser<A> a, Parser<B> b) =>
+    pure(Tuple<A, B>.new.curry) << a << b;
+
+Parser<T> parseOr<T>(Parser<T> left, Parser<T> right) => catchP(
+      left,
+      (leftE) => catchP(
+        right,
+        (rightE) => failP(
+          _OrParserException(leftE, rightE),
         ),
-        b: pure,
       ),
     );
 
 Parser<Either<A, B>> parseEither<A, B>(Parser<A> left, Parser<B> right) =>
-    left.bindResult(
-      (leftResult) => leftResult.visit(
-        a: (leftErr) => right.bindResult(
-          (rightResult) => rightResult.visit(
-            // fail or failure?
-            a: _EitherParserException.new.curry(leftErr).comp(failure),
-            b: Right<A, B>.new.comp(pure),
-          ),
+    catchP(
+      left.map(Left.new),
+      (leftE) => catchP(
+        right.map(Right.new),
+        (rightE) => failP(
+          _EitherParserException(leftE, rightE),
         ),
-        b: Left<A, B>.new.comp(pure),
       ),
     );
 
 /// Try parsing an [T] with the parser [p]. If it fails, an empty iterable is
 /// returned, otherwise an iterable containing just one value is returned
-Parser<Iterable<T>> parseZeroOrOne<T>(Parser<T> p) => p.bindResult(
-      (result) => result.visit(
-        a: (err) => pure([]),
-        b: (value) => pure([value]),
-      ),
+Parser<Iterable<T>> parseZeroOrOne<T>(Parser<T> p) => catchP(
+      p.map((e) => [e]),
+      (e) => pure([]),
     );
 
 /// Try parsing zero or one [T]

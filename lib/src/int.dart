@@ -6,6 +6,13 @@ import 'combinator.dart';
 import 'predicates.dart';
 import 'type.dart';
 
+int asciiDigitFromChar(int codeUnit) {
+  assert(isAsciiDigit(codeUnit));
+  final digit = codeUnit - 0x30;
+  assert(digit >= 0 && digit <= 9);
+  return digit;
+}
+
 // int_literal ::= radix_int_literal
 //               | regular_int_literal
 Parser<int> intLiteral = radixIntLiteral | regularIntLiteral;
@@ -13,9 +20,9 @@ Parser<int> intLiteral = radixIntLiteral | regularIntLiteral;
 // radix_int_literal ::= `0` radix_literal
 // radix_literal ::= `b` binary_literal
 //                 | `x` hex_literal
-Parser<int> radixIntLiteral = character('0').followedBy(
-  character('b').followedBy(binaryLiteral) |
-      character('x').followedBy(hexLiteral),
+Parser<int> radixIntLiteral = exactChar('0').followedBy(
+  exactChar('b').followedBy(binaryLiteral) |
+      exactChar('x').followedBy(hexLiteral),
 );
 
 // binary_literal ::= binary_digit+
@@ -30,13 +37,14 @@ Parser<int> regularIntLiteral =
     pure(_intFromSignAndDigits.curry) << maybeNegSign << parseOneOrMore(digit);
 
 // maybe_neg_sign ::= `-`?
-Parser<int> maybeNegSign = characterMatching('-', -1) | pure(1);
+Parser<int> maybeNegSign = assignCharToValue('-', -1) | pure(1);
 
 // digit ::= `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9`
-Parser<int> digit = char.where(isAsciiDigit).map(asciiDigitFromChar);
+Parser<int> digit = codeUnit.where(isAsciiDigit).map(asciiDigitFromChar);
 
 // binary_digit ::= `0` | `1`
-Parser<int> binaryDigit = char.where(isAsciiZeroOrOne).map(asciiDigitFromChar);
+Parser<int> binaryDigit =
+    codeUnit.where(isAsciiZeroOrOne).map(asciiDigitFromChar);
 
 // hex_digit ::= digit | a | b | c | d | e | f
 // a ::= `A` | `a`
@@ -46,12 +54,12 @@ Parser<int> binaryDigit = char.where(isAsciiZeroOrOne).map(asciiDigitFromChar);
 // e ::= `E` | `e`
 // f ::= `F` | `f`
 Parser<int> hexDigit = digit |
-    oneOfCharacterMatching(const {'A', 'a'}, 0xA) |
-    oneOfCharacterMatching(const {'B', 'b'}, 0xB) |
-    oneOfCharacterMatching(const {'C', 'c'}, 0xC) |
-    oneOfCharacterMatching(const {'D', 'd'}, 0xD) |
-    oneOfCharacterMatching(const {'E', 'e'}, 0xE) |
-    oneOfCharacterMatching(const {'F', 'f'}, 0xF);
+    assignOneOfCharsToValue(const {'A', 'a'}, 0xA) |
+    assignOneOfCharsToValue(const {'B', 'b'}, 0xB) |
+    assignOneOfCharsToValue(const {'C', 'c'}, 0xC) |
+    assignOneOfCharsToValue(const {'D', 'd'}, 0xD) |
+    assignOneOfCharsToValue(const {'E', 'e'}, 0xE) |
+    assignOneOfCharsToValue(const {'F', 'f'}, 0xF);
 
 int _intFromRadixDigits(Iterable<int> digits, int radix) => digits.fold(
       0,
