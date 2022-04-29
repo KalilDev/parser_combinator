@@ -8,23 +8,8 @@ import 'combinator.dart';
 import 'type.dart';
 
 // ignore: prefer_function_declarations_over_variables
-final Parser<int> codeUnit = (state, line) => state.getFirstUnit();
+final Parser<int> codeUnit = (state) => state.consumeUnit();
 final Parser<String> char = codeUnit.map(String.fromCharCode);
-
-final Parser<int> readCodeUnit = modifyP<int>((state) {
-  if (state.left.isEmpty) {
-    return state;
-  }
-  var linecount = state.right;
-  final unit = state.left.firstCodeUnit();
-  const newLineCodeUnit = 0x0a;
-  if (unit == newLineCodeUnit) {
-    linecount += 1;
-  }
-  return Tuple(state.left.next(), linecount);
-})(codeUnit);
-
-final Parser<String> readChar = readCodeUnit.map(String.fromCharCode);
 
 Parser<int> exactCodeUnit(int target) =>
     codeUnit.where((result) => result == target);

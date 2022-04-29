@@ -33,11 +33,12 @@ Parser<int> binaryLiteral =
 Parser<int> hexLiteral = parseOneOrMore(hexDigit).map(_intFromHexDigits);
 
 // regular_int_literal ::= maybe_sign digit+
-Parser<int> regularIntLiteral =
-    pure(_intFromSignAndDigits.curry) << maybeNegSign << parseOneOrMore(digit);
+Parser<int> regularIntLiteral = returnP(_intFromSignAndDigits.curry) <<
+    maybeNegSign <<
+    parseOneOrMore(digit);
 
 // maybe_neg_sign ::= `-`?
-Parser<int> maybeNegSign = assignCharToValue('-', -1) | pure(1);
+Parser<int> maybeNegSign = assignCharToValue('-', -1) | returnP(1);
 
 // digit ::= `0` | `1` | `2` | `3` | `4` | `5` | `6` | `7` | `8` | `9`
 Parser<int> digit = codeUnit.where(isAsciiDigit).map(asciiDigitFromChar);

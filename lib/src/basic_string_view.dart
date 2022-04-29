@@ -2,7 +2,8 @@ part of 'type.dart';
 
 abstract class _ParserStateTraits {
   const _ParserStateTraits();
-  ParseOutput<int> consumeUnit();
+  Reply<int> getFirstUnit();
+  ConsumedData<int> consumeUnit();
 }
 
 class _StringView extends _ParserStateTraits {
@@ -12,6 +13,9 @@ class _StringView extends _ParserStateTraits {
 
   const _StringView(this.source, this.start, this.end)
       : assert(0 <= start && start <= end && end <= source.length);
+  const _StringView.fromString(this.source)
+      : start = 0,
+        end = source.length;
 
   static const empty = _StringView('', 0, 0);
 
@@ -29,14 +33,14 @@ class _StringView extends _ParserStateTraits {
       : source.codeUnitAt(start);
 
   @override
-  ParseResult<int> getFirstUnit() => isEmpty
-      ? ParseResult.left(ParseError("No more chars in '$this'"))
-      : ParseResult.right(source.codeUnitAt(start));
+  Reply<int> getFirstUnit() => isEmpty
+      ? Reply.left(ParseError("No more chars in '$this'"))
+      : Reply.right(Ok(source.codeUnitAt(start), next()));
 
   @override
-  ParseOutput<int> consumeUnit() => isEmpty
-      ? errorResult(Exception("Reached EOF"), this)
-      : success(source.codeUnitAt(start), next());
+  ConsumedData<int> consumeUnit() => isEmpty
+      ? Empty(Reply.left(ParseError("No more chars in '$this'")))
+      : Consumed(Reply.right(Ok(source.codeUnitAt(start), next())));
 
   int get hashCode => Object.hash(source, start, end);
 
